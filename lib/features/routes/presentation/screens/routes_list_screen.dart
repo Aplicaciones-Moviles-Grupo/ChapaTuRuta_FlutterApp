@@ -6,7 +6,6 @@ import '../widgets/route_card.dart';
 import 'route_detail_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../profile/presentation/screens/favorites_screen.dart';
-import '../../../profile/presentation/providers/user_provider.dart';
 
 class RoutesListScreen extends StatefulWidget {
   const RoutesListScreen({super.key});
