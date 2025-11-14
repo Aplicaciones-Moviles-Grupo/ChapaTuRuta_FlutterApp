@@ -28,24 +28,18 @@ class RouteCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Imagen placeholder
-              Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.directions_bus,
-                    size: 60,
-                    color: Colors.grey[600],
-                  ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/${route.image}',
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
               ),
+
               const SizedBox(height: 12),
-              
-              // Nombre de la ruta
+
               Text(
                 route.name,
                 style: const TextStyle(
@@ -55,8 +49,7 @@ class RouteCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              
-              // Empresa
+
               Text(
                 route.company,
                 style: TextStyle(
@@ -64,9 +57,9 @@ class RouteCard extends StatelessWidget {
                   color: Colors.grey[700],
                 ),
               ),
+
               const SizedBox(height: 12),
-              
-              // Duración y Tarifa
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -94,6 +87,7 @@ class RouteCard extends StatelessWidget {
                   ),
                 ],
               ),
+
             ],
           ),
         ),
