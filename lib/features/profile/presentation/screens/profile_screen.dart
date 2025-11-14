@@ -4,6 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../providers/user_provider.dart';
 import '../widgets/profile_option_tile.dart';
 import 'edit_profile_screen.dart';
+import 'favorites_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -142,13 +143,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       ProfileOptionTile(
                         icon: Icons.favorite_border,
-                        title: 'Favourites',
+                        title: 'Favoritos',
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Tienes ${user.favoriteRoutes.length} rutas favoritas'
-                              ),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const FavoritesScreen(),
                             ),
                           );
                         },
