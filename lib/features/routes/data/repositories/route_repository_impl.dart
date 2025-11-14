@@ -4,7 +4,6 @@ import '../models/route_model.dart';
 import '../models/stop_model.dart';
 
 class RouteRepositoryImpl implements RouteRepository {
-  // Datos de ejemplo (simulando una base de datos local)
   final List<TransportRouteModel> _mockRoutes = [
     TransportRouteModel(
       id: '1',
@@ -29,7 +28,9 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '12:00pm - 5:00pm',
         'Sábado': '12:00pm - 5:00pm',
       },
+      image: 'paradero_agustino.jpg',
     ),
+
     TransportRouteModel(
       id: '2',
       name: 'Miraflores - Barranco',
@@ -53,7 +54,9 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '6:00am - 11:00pm',
         'Sábado': '8:00am - 11:00pm',
       },
+      image: 'miraflores-barranco.jpg',
     ),
+
     TransportRouteModel(
       id: '3',
       name: 'Callao - San Miguel',
@@ -77,7 +80,9 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '5:00am - 11:00pm',
         'Sábado': '6:00am - 10:00pm',
       },
+      image: 'callao-sanmiguel.webp',
     ),
+
     TransportRouteModel(
       id: '4',
       name: 'Surco - La Molina',
@@ -101,7 +106,9 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '6:00am - 10:00pm',
         'Sábado': '7:00am - 9:00pm',
       },
+      image: 'surco-lamolina.webp',
     ),
+
     TransportRouteModel(
       id: '5',
       name: 'Los Olivos - Independencia',
@@ -125,7 +132,9 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '5:30am - 11:00pm',
         'Sábado': '6:00am - 10:00pm',
       },
+      image: 'indepencia-losolivos.webp',
     ),
+
     TransportRouteModel(
       id: '6',
       name: 'Chorrillos - Villa El Salvador',
@@ -149,7 +158,9 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '6:00am - 10:00pm',
         'Sábado': '7:00am - 9:00pm',
       },
+      image: 'chorrillos-villaelsalvador.jpg',
     ),
+
     TransportRouteModel(
       id: '7',
       name: 'Ate - Santa Anita',
@@ -173,7 +184,9 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '5:00am - 11:00pm',
         'Sábado': '6:00am - 10:00pm',
       },
+      image: 'santaanita-ate.webp',
     ),
+
     TransportRouteModel(
       id: '8',
       name: 'Pueblo Libre - Jesús María',
@@ -197,7 +210,9 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '6:00am - 10:30pm',
         'Sábado': '7:00am - 10:00pm',
       },
+      image: 'jesusmaria-pueblolibre.webp',
     ),
+
     TransportRouteModel(
       id: '9',
       name: 'San Juan de Lurigancho - El Agustino',
@@ -221,7 +236,9 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '5:30am - 10:30pm',
         'Sábado': '6:00am - 9:30pm',
       },
+      image: 'agustino-sjl.jpg',
     ),
+
     TransportRouteModel(
       id: '10',
       name: 'San Borja - La Victoria',
@@ -245,12 +262,12 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '6:00am - 11:00pm',
         'Sábado': '7:00am - 10:00pm',
       },
+      image: 'San borja-lavictoria.jpg',
     ),
   ];
 
   @override
   Future<List<TransportRoute>> getAllRoutes() async {
-    // Simular delay de red
     await Future.delayed(const Duration(milliseconds: 500));
     return _mockRoutes;
   }
