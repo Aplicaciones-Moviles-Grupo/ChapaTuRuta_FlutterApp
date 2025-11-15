@@ -87,42 +87,33 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
             children: [
               // Imágenes
               Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: AppTheme.off,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.image_outlined,
-                          size: 60,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: AppTheme.off,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.image_outlined,
-                          size: 60,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+  children: [
+    Expanded(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.asset(
+          'assets/images/${route!.stopA.image}',
+          height: 200,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+    const SizedBox(width: 12),
+    Expanded(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.asset(
+          'assets/images/${route!.stopB.image}',
+          height: 200,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+  ],
+),
+
               const SizedBox(height: 24),
               
               // Información principal

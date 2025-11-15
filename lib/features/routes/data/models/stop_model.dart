@@ -4,12 +4,14 @@ class StopModel extends Stop {
   StopModel({
     required super.name,
     required super.address,
+    required super.image,
   });
 
   factory StopModel.fromJson(Map<String, dynamic> json) {
     return StopModel(
       name: json['name'],
       address: json['address'],
+      image: json['image']
     );
   }
 
@@ -17,6 +19,7 @@ class StopModel extends Stop {
     return {
       'name': name,
       'address': address,
+      'image' : image,
     };
   }
 }
