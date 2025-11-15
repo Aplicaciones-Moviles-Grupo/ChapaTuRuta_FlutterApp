@@ -24,7 +24,7 @@ class RouteCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -32,18 +32,18 @@ class RouteCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: Image.asset(
                   'assets/images/${route.image}',
-                  height: 110,
+                  height: 95,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
               Text(
                 route.name,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textColor,
                 ),
@@ -53,7 +53,7 @@ class RouteCard extends StatelessWidget {
               Text(
                 route.company,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: Colors.grey[700],
                 ),
               ),
@@ -69,7 +69,7 @@ class RouteCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         route.duration.split(' ')[0],
-                        style: const TextStyle(fontSize: 13),
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
@@ -79,7 +79,7 @@ class RouteCard extends StatelessWidget {
                       Text(
                         's/. ${route.price.toStringAsFixed(2)}',
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
