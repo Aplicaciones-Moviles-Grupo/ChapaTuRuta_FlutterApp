@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/route.dart';
 import '../providers/route_provider.dart';
+import '../../../profile/presentation/providers/user_provider.dart';
 
 class RouteDetailScreen extends StatefulWidget {
   final String routeId;
@@ -65,18 +66,35 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
         ),
         title: Text(route!.name),
         actions: [
-          TextButton(
-            onPressed: () {
-              // Agregar a colección
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Agregado a colección')),
+          Consumer<UserProvider>(
+            builder: (context, userProvider, child) {
+              final isFavorite = userProvider.currentUser?.favoriteRoutes.contains(route!.id) ?? false;
+              return IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : AppTheme.textColor,
+                ),
+                onPressed: () async {
+                  if (isFavorite) {
+                    await userProvider.removeFavoriteRoute(route!.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Eliminado de favoritos')),
+                      );
+                    }
+                  } else {
+                    await userProvider.addFavoriteRoute(route!.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Agregado a favoritos')),
+                      );
+                    }
+                  }
+                },
               );
             },
-            child: const Text(
-              'Agregar a una colección',
-              style: TextStyle(color: AppTheme.primary),
-            ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -87,42 +105,33 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
             children: [
               // Imágenes
               Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: AppTheme.off,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.image_outlined,
-                          size: 60,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: AppTheme.off,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.image_outlined,
-                          size: 60,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+  children: [
+    Expanded(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.asset(
+          'assets/images/${route!.stopA.image}',
+          height: 200,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+    const SizedBox(width: 12),
+    Expanded(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.asset(
+          'assets/images/${route!.stopB.image}',
+          height: 200,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+  ],
+),
+
               const SizedBox(height: 24),
               
               // Información principal

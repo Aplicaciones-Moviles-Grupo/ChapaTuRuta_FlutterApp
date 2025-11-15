@@ -15,6 +15,7 @@ class TransportRoute {
   final String district;
   final String locality;
   final Map<String, String> schedule;
+  final String image;
 
   TransportRoute({
     required this.id,
@@ -31,5 +32,6 @@ class TransportRoute {
     required this.district,
     required this.locality,
     required this.schedule,
+    required this.image,
   });
 }

@@ -17,6 +17,7 @@ class TransportRouteModel extends TransportRoute {
     required super.district,
     required super.locality,
     required super.schedule,
+    required super.image,
   });
 
   factory TransportRouteModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +36,7 @@ class TransportRouteModel extends TransportRoute {
       district: json['district'],
       locality: json['locality'],
       schedule: Map<String, String>.from(json['schedule']),
+      image: json['image'],
     );
   }
 
@@ -54,6 +56,7 @@ class TransportRouteModel extends TransportRoute {
       'district': district,
       'locality': locality,
       'schedule': schedule,
+      'image': image,
     };
   }
 }
