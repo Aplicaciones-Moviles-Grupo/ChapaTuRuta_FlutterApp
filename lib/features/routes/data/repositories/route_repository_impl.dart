@@ -13,8 +13,8 @@ class RouteRepositoryImpl implements RouteRepository {
       frequency: 'Suele salir cada 10 min',
       phone: '+51 923423422',
       price: 8.00,
-      stopA: StopModel(name: 'Paradero A', address: 'Av. Inca 123', image:''),
-      stopB: StopModel(name: 'Paradero B', address: 'Jr. El Paso 321', image:''),
+      stopA: StopModel(name: 'Paradero A', address: 'Av. Inca 123', image: 'placeholder.png',),
+      stopB: StopModel(name: 'Paradero B', address: 'Jr. El Paso 321',image: 'placeholder.png',),
       region: 'Lima',
       province: 'Lima',
       district: 'San Isidro',
@@ -28,7 +28,7 @@ class RouteRepositoryImpl implements RouteRepository {
         'Viernes': '12:00pm - 5:00pm',
         'Sábado': '12:00pm - 5:00pm',
       },
-      image: '',
+      image: 'placeholder.png',
     ),
 
     TransportRouteModel(

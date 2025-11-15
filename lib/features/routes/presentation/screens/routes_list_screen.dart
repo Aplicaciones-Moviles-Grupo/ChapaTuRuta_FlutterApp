@@ -205,7 +205,7 @@ class _RoutesListScreenState extends State<RoutesListScreen> {
                                 padding: const EdgeInsets.all(16),
                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
-                                  childAspectRatio: 0.75,
+                                  childAspectRatio: 0.85,
                                   crossAxisSpacing: 12,
                                   mainAxisSpacing: 12,
                                 ),
