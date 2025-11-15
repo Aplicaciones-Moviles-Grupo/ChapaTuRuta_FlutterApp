@@ -5,6 +5,7 @@ import '../providers/route_provider.dart';
 import '../widgets/route_card.dart';
 import 'route_detail_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
+import '../../../profile/presentation/screens/favorites_screen.dart';
 
 class RoutesListScreen extends StatefulWidget {
   const RoutesListScreen({super.key});
@@ -81,9 +82,16 @@ class _RoutesListScreenState extends State<RoutesListScreen> {
             ),
             const SizedBox(width: 16),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FavoritesScreen(),
+                  ),
+                );
+              },
               child: Text(
-                'Ver mis colecciones',
+                'Ver mis favoritos',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontWeight: FontWeight.w400,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/route.dart';
 import '../providers/route_provider.dart';
+import '../../../profile/presentation/providers/user_provider.dart';
 
 class RouteDetailScreen extends StatefulWidget {
   final String routeId;
@@ -65,18 +66,35 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
         ),
         title: Text(route!.name),
         actions: [
-          TextButton(
-            onPressed: () {
-              // Agregar a colección
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Agregado a colección')),
+          Consumer<UserProvider>(
+            builder: (context, userProvider, child) {
+              final isFavorite = userProvider.currentUser?.favoriteRoutes.contains(route!.id) ?? false;
+              return IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : AppTheme.textColor,
+                ),
+                onPressed: () async {
+                  if (isFavorite) {
+                    await userProvider.removeFavoriteRoute(route!.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Eliminado de favoritos')),
+                      );
+                    }
+                  } else {
+                    await userProvider.addFavoriteRoute(route!.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Agregado a favoritos')),
+                      );
+                    }
+                  }
+                },
               );
             },
-            child: const Text(
-              'Agregar a una colección',
-              style: TextStyle(color: AppTheme.primary),
-            ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
