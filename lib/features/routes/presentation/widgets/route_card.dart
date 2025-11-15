@@ -32,7 +32,7 @@ class RouteCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: Image.asset(
                   'assets/images/${route.image}',
-                  height: 150,
+                  height: 110,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
