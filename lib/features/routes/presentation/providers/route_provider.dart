@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/route.dart';
 import '../../domain/repositories/route_repository.dart';
+import '../../data/datasources/route_api_service.dart';
 
 class RouteProvider with ChangeNotifier {
   final RouteRepository repository;
+  final RouteApiService? apiService;
   
   List<TransportRoute> _routes = [];
   List<TransportRoute> _filteredRoutes = [];
@@ -15,7 +17,10 @@ class RouteProvider with ChangeNotifier {
   String? _selectedDistrict;
   String? _selectedLocality;
 
-  RouteProvider({required this.repository});
+  RouteProvider({
+    required this.repository,
+    this.apiService,
+  });
 
   List<TransportRoute> get routes => _filteredRoutes.isEmpty ? _routes : _filteredRoutes;
   bool get isLoading => _isLoading;
@@ -25,6 +30,10 @@ class RouteProvider with ChangeNotifier {
   String? get selectedProvince => _selectedProvince;
   String? get selectedDistrict => _selectedDistrict;
   String? get selectedLocality => _selectedLocality;
+
+  void setToken(String token) {
+    apiService?.setBearerToken(token);
+  }
 
   Future<void> loadRoutes() async {
     _isLoading = true;
@@ -37,7 +46,7 @@ class RouteProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _error = 'Error al cargar las rutas';
+      _error = e.toString().replaceAll('Exception: ', '');
       _isLoading = false;
       notifyListeners();
     }
@@ -66,7 +75,7 @@ class RouteProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _error = 'Error al filtrar rutas';
+      _error = e.toString().replaceAll('Exception: ', '');
       _isLoading = false;
       notifyListeners();
     }
@@ -102,6 +111,12 @@ class RouteProvider with ChangeNotifier {
   }
 
   Future<TransportRoute?> getRouteById(String id) async {
-    return await repository.getRouteById(id);
+    try {
+      return await repository.getRouteById(id);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return null;
+    }
   }
 }

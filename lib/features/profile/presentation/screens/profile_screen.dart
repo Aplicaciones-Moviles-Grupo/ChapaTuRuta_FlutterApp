@@ -5,6 +5,8 @@ import '../providers/user_provider.dart';
 import '../widgets/profile_option_tile.dart';
 import 'edit_profile_screen.dart';
 import 'favorites_screen.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -224,19 +226,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       Divider(height: 1, color: Colors.grey[300]),
                       
-                      ProfileOptionTile(
-                        icon: Icons.logout,
-                        title: 'Log Out',
-                        onTap: () async {
-                          await provider.logout();
-                          if (context.mounted) {
-                            Navigator.of(context).popUntil((route) => route.isFirst);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Sesión cerrada')),
-                            );
-                          }
-                        },
-                      ),
+                    ProfileOptionTile(
+  icon: Icons.logout,
+  title: 'Log Out',
+  onTap: () async {
+    // Mostrar diálogo de confirmación
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cerrar Sesión'),
+        content: const Text('¿Estás seguro que deseas cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Cerrar Sesión'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true && context.mounted) {
+      // Cerrar sesión en ambos providers
+      await context.read<UserProvider>().logout();
+      await context.read<AuthProvider>().logout();
+      
+      if (context.mounted) {
+        // Navegar a login y limpiar el stack
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      }
+    }
+  },
+),
                     ],
                   ),
                 ),

@@ -138,7 +138,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => RouteDetailScreen(
-                        routeId: route.id,
+                        routeId: route.id.toString(),
                       ),
                     ),
                   );

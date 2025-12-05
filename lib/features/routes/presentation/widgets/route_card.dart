@@ -24,62 +24,85 @@ class RouteCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  'assets/images/${route.image}',
-                  height: 95,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+              // Imagen placeholder
+              Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.directions_bus,
+                    size: 50,
+                    color: Colors.grey[600],
+                  ),
                 ),
               ),
-
-              const SizedBox(height: 8),
-
+              const SizedBox(height: 12),
+              
+              // Nombre de la ruta
               Text(
                 route.name,
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textColor,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
-
-              Text(
-                route.company,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[700],
+              
+              // Estado
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: route.state == 'Active' 
+                      ? Colors.green.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  route.state,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: route.state == 'Active' ? Colors.green[700] : Colors.grey[700],
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-
               const SizedBox(height: 12),
-
+              
+              // Duración y Precio
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                      const Icon(Icons.access_time, size: 14, color: Colors.grey),
                       const SizedBox(width: 4),
                       Text(
-                        route.duration.split(' ')[0],
+                        route.duration,
                         style: const TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.attach_money, size: 16, color: Colors.grey),
+                      const Text(
+                        's/.',
+                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                      const SizedBox(width: 2),
                       Text(
-                        's/. ${route.price.toStringAsFixed(2)}',
+                        route.price.toStringAsFixed(2),
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -87,7 +110,19 @@ class RouteCard extends StatelessWidget {
                   ),
                 ],
               ),
-
+              const SizedBox(height: 4),
+              
+              // Distancia
+              Row(
+                children: [
+                  const Icon(Icons.straighten, size: 14, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    route.distance,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

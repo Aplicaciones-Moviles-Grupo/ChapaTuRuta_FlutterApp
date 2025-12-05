@@ -161,7 +161,7 @@ class _RoutesListScreenState extends State<RoutesListScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => RouteDetailScreen(routeId: route.id),
+                                builder: (_) => RouteDetailScreen(routeId: route.id.toString()),
                               ),
                             );
                           },

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/route.dart';
 import '../providers/route_provider.dart';
-import '../../../profile/presentation/providers/user_provider.dart';
 
 class RouteDetailScreen extends StatefulWidget {
   final String routeId;
@@ -66,35 +65,17 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
         ),
         title: Text(route!.name),
         actions: [
-          Consumer<UserProvider>(
-            builder: (context, userProvider, child) {
-              final isFavorite = userProvider.currentUser?.favoriteRoutes.contains(route!.id) ?? false;
-              return IconButton(
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? Colors.red : AppTheme.textColor,
-                ),
-                onPressed: () async {
-                  if (isFavorite) {
-                    await userProvider.removeFavoriteRoute(route!.id);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Eliminado de favoritos')),
-                      );
-                    }
-                  } else {
-                    await userProvider.addFavoriteRoute(route!.id);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Agregado a favoritos')),
-                      );
-                    }
-                  }
-                },
+          TextButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Agregado a colección')),
               );
             },
+            child: const Text(
+              'Agregar a colección',
+              style: TextStyle(color: AppTheme.primary),
+            ),
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -103,141 +84,237 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Imágenes
-              Row(
-  children: [
-    Expanded(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.asset(
-          'assets/images/${route!.stopA.image}',
-          height: 200,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      ),
-    ),
-    const SizedBox(width: 12),
-    Expanded(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.asset(
-          'assets/images/${route!.stopB.image}',
-          height: 200,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      ),
-    ),
-  ],
-),
-
+              // Imagen principal (puedes usar Google Maps Static API si tienes polyline)
+              Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppTheme.off,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: route!.polylineRoute != null && route!.polylineRoute!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          'https://maps.googleapis.com/maps/api/staticmap?size=600x400&path=enc:${route!.polylineRoute}&key=YOUR_GOOGLE_MAPS_KEY',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Icon(
+                                Icons.map,
+                                size: 60,
+                                color: Colors.grey[600],
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : Center(
+                        child: Icon(
+                          Icons.map,
+                          size: 60,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+              ),
               const SizedBox(height: 24),
               
               // Información principal
               Row(
                 children: [
-                  const Icon(Icons.image_outlined, size: 24),
-                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: route!.state == 'Active' 
+                          ? Colors.green.withOpacity(0.2)
+                          : Colors.grey.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.directions_bus,
+                      color: route!.state == 'Active' ? Colors.green[700] : Colors.grey[700],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      route!.company,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          route!.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: route!.state == 'Active' 
+                                ? Colors.green.withOpacity(0.2)
+                                : Colors.grey.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            route!.state,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: route!.state == 'Active' 
+                                  ? Colors.green[700] 
+                                  : Colors.grey[700],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Text(
                     's/${route!.price.toStringAsFixed(2)}',
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               
-              // Detalles
-              _buildInfoRow(Icons.access_time, route!.duration),
-              _buildInfoRow(Icons.schedule, route!.frequency),
-              _buildInfoRow(Icons.phone, route!.phone),
-              
+              // Detalles de la ruta
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.off.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    _buildDetailRow(
+                      Icons.access_time,
+                      'Duración',
+                      route!.duration,
+                    ),
+                    const Divider(height: 24),
+                    _buildDetailRow(
+                      Icons.straighten,
+                      'Distancia',
+                      route!.distance,
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 24),
               
               // Direcciones
               const Text(
-                'Direcciones:',
+                'Ruta:',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text('Paradero A: ${route!.stopA.address}'),
-              const SizedBox(height: 4),
-              Text('Paradero B: ${route!.stopB.address}'),
+              const SizedBox(height: 12),
               
-              const SizedBox(height: 24),
-              
-              // Contacto
-              const Text(
-                'Contacto:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+              _buildAddressCard(
+                'Origen',
+                route!.origin,
+                route!.originAddress ?? 'Dirección no disponible',
+                Icons.location_on,
+                Colors.green,
               ),
-              const SizedBox(height: 8),
-              Text('Paradero A: ${route!.phone}'),
-              Text('Paradero B: ${route!.phone}'),
+              const SizedBox(height: 12),
               
+              _buildAddressCard(
+                'Destino',
+                route!.destination,
+                route!.destinationAddress ?? 'Dirección no disponible',
+                Icons.location_on,
+                Colors.red,
+              ),
               const SizedBox(height: 24),
               
-              // Horarios
+              // Información del conductor
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    const Text(
-                      'Horarios de atención',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundColor: AppTheme.primary.withOpacity(0.2),
+                      child: const Icon(
+                        Icons.person,
+                        size: 30,
+                        color: AppTheme.primary,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    ...route!.schedule.entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              entry.key,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[700],
-                              ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Conductor',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
                             ),
-                            Text(
-                              entry.value,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          ),
+                          Text(
+                            'ID: ${route!.driverId}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                      );
-                    }),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // Contactar conductor
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Función de contacto')),
+                        );
+                      },
+                      icon: const Icon(Icons.message, color: AppTheme.primary),
+                    ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Botón de acción
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Reservar ruta: ${route!.name}'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Reservar Ruta',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -247,16 +324,84 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 24, color: AppTheme.primary),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.grey,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddressCard(
+    String label,
+    String title,
+    String address,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: const TextStyle(fontSize: 14),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (address != 'Dirección no disponible')
+                  Text(
+                    address,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
