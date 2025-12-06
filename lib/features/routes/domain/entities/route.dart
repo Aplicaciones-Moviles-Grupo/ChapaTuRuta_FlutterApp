@@ -1,37 +1,42 @@
-import 'stop.dart';
 
 class TransportRoute {
-  final String id;
+  final int id;
   final String name;
-  final String company;
-  final String duration;
-  final String frequency;
-  final String phone;
   final double price;
-  final Stop stopA;
-  final Stop stopB;
-  final String region;
-  final String province;
-  final String district;
-  final String locality;
-  final Map<String, String> schedule;
-  final String image;
+  final String duration;
+  final String distance;
+  final String state;
+  final String? polylineRoute;
+  final int driverId;
+  
+  // Estos campos los derivamos del name o los dejamos opcionales
+  final String? originAddress;
+  final String? destinationAddress;
 
   TransportRoute({
     required this.id,
     required this.name,
-    required this.company,
-    required this.duration,
-    required this.frequency,
-    required this.phone,
     required this.price,
-    required this.stopA,
-    required this.stopB,
-    required this.region,
-    required this.province,
-    required this.district,
-    required this.locality,
-    required this.schedule,
-    required this.image,
+    required this.duration,
+    required this.distance,
+    required this.state,
+    this.polylineRoute,
+    required this.driverId,
+    this.originAddress,
+    this.destinationAddress,
   });
+
+  // Método helper para obtener nombre del origen (parseamos el name)
+  String get origin {
+    if (originAddress != null) return originAddress!;
+    final parts = name.split('-');
+    return parts.isNotEmpty ? parts[0].trim() : 'Origen';
+  }
+
+  // Método helper para obtener nombre del destino
+  String get destination {
+    if (destinationAddress != null) return destinationAddress!;
+    final parts = name.split('-');
+    return parts.length > 1 ? parts[1].trim() : 'Destino';
+  }
 }

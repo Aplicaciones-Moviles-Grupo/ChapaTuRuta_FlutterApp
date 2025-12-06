@@ -7,17 +7,8 @@ import '../models/user_model.dart';
 class UserRepositoryImpl implements UserRepository {
   static const String _userKey = 'current_user';
   
-  // Usuario de ejemplo (simulando autenticación)
-  final UserModel _defaultUser = UserModel(
-    id: '1',
-    name: 'Sabrina',
-    lastName: 'Aryan',
-    username: 'sabrina',
-    email: 'sabrinArya20@gmail.com',
-    phone: '+51 004 6470',
-    gender: 'Mujer',
-    favoriteRoutes: [],
-  );
+  // 1. ELIMINAMOS EL USUARIO DE EJEMPLO (_defaultUser)
+  // Ya no hardcodeamos a "Sabrina"
 
   @override
   Future<User?> getCurrentUser() async {
@@ -30,11 +21,13 @@ class UserRepositoryImpl implements UserRepository {
         return UserModel.fromJson(userData);
       }
       
-      // Si no hay usuario guardado, usar el default
-      await _saveUser(_defaultUser);
-      return _defaultUser;
+      // 2. CORREGIDO: Si no hay usuario guardado, devolvemos null.
+      // Esto le dice a la app "Nadie ha iniciado sesión".
+      return null; 
+
     } catch (e) {
-      return _defaultUser;
+      // En caso de error, también devolvemos null
+      return null;
     }
   }
 
@@ -43,9 +36,12 @@ class UserRepositoryImpl implements UserRepository {
     await _saveUser(user);
   }
 
+  // Este método es privado pero útil para guardar cuando haces Login real
   Future<void> _saveUser(User user) async {
     final prefs = await SharedPreferences.getInstance();
-    final userModel = UserModel(
+    
+    // Convertimos la entidad User a UserModel si es necesario
+    final userModel = user is UserModel ? user : UserModel(
       id: user.id,
       name: user.name,
       lastName: user.lastName,
@@ -55,7 +51,13 @@ class UserRepositoryImpl implements UserRepository {
       gender: user.gender,
       favoriteRoutes: user.favoriteRoutes,
     );
+    
     await prefs.setString(_userKey, json.encode(userModel.toJson()));
+  }
+
+  // Método público para guardar usuario (Útil para llamar desde el AuthProvider al hacer login)
+  Future<void> saveUserSession(UserModel user) async {
+    await _saveUser(user);
   }
 
   @override
@@ -67,6 +69,7 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> addFavoriteRoute(String routeId) async {
     final user = await getCurrentUser();
+    // Solo agrega si hay un usuario real logueado
     if (user != null && !user.favoriteRoutes.contains(routeId)) {
       final updatedUser = UserModel(
         id: user.id,
@@ -85,6 +88,7 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> removeFavoriteRoute(String routeId) async {
     final user = await getCurrentUser();
+    // Solo elimina si hay un usuario real logueado
     if (user != null) {
       final updatedRoutes = user.favoriteRoutes.where((id) => id != routeId).toList();
       final updatedUser = UserModel(

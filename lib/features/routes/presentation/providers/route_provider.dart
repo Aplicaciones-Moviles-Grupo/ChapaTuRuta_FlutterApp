@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/route.dart';
 import '../../domain/repositories/route_repository.dart';
+import '../../data/datasources/route_api_service.dart';
 
 class RouteProvider with ChangeNotifier {
   final RouteRepository repository;
+  final RouteApiService? apiService;
   
   List<TransportRoute> _routes = [];
   List<TransportRoute> _filteredRoutes = [];
+  
+  // 👇 AGREGADO: Lista para guardar los favoritos en memoria
+  final List<TransportRoute> _favoriteRoutes = [];
+
   bool _isLoading = false;
   String? _error;
   
@@ -15,9 +21,16 @@ class RouteProvider with ChangeNotifier {
   String? _selectedDistrict;
   String? _selectedLocality;
 
-  RouteProvider({required this.repository});
+  RouteProvider({
+    required this.repository,
+    this.apiService,
+  });
 
   List<TransportRoute> get routes => _filteredRoutes.isEmpty ? _routes : _filteredRoutes;
+  
+  // 👇 AGREGADO: Getter para leer los favoritos desde la pantalla de favoritos
+  List<TransportRoute> get favoriteRoutes => _favoriteRoutes;
+
   bool get isLoading => _isLoading;
   String? get error => _error;
   
@@ -25,6 +38,26 @@ class RouteProvider with ChangeNotifier {
   String? get selectedProvince => _selectedProvince;
   String? get selectedDistrict => _selectedDistrict;
   String? get selectedLocality => _selectedLocality;
+
+  void setToken(String token) {
+    apiService?.setBearerToken(token);
+  }
+
+  // 👇 AGREGADO: Método para saber si una ruta ya es favorita
+  bool isFavorite(int id) {
+    return _favoriteRoutes.any((route) => route.id == id);
+  }
+
+  // 👇 AGREGADO: Método para agregar o quitar de favoritos
+  void toggleFavorite(TransportRoute route) {
+    final exists = _favoriteRoutes.any((r) => r.id == route.id);
+    if (exists) {
+      _favoriteRoutes.removeWhere((r) => r.id == route.id);
+    } else {
+      _favoriteRoutes.add(route);
+    }
+    notifyListeners();
+  }
 
   Future<void> loadRoutes() async {
     _isLoading = true;
@@ -37,7 +70,7 @@ class RouteProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _error = 'Error al cargar las rutas';
+      _error = e.toString().replaceAll('Exception: ', '');
       _isLoading = false;
       notifyListeners();
     }
@@ -66,7 +99,7 @@ class RouteProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _error = 'Error al filtrar rutas';
+      _error = e.toString().replaceAll('Exception: ', '');
       _isLoading = false;
       notifyListeners();
     }
@@ -102,6 +135,12 @@ class RouteProvider with ChangeNotifier {
   }
 
   Future<TransportRoute?> getRouteById(String id) async {
-    return await repository.getRouteById(id);
+    try {
+      return await repository.getRouteById(id);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return null;
+    }
   }
 }
