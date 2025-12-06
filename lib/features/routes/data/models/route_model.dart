@@ -15,10 +15,12 @@ class TransportRouteModel extends TransportRoute {
   });
 
   factory TransportRouteModel.fromJson(Map<String, dynamic> json) {
+    print('🔄 Parseando ruta: ${json['name']}');
+    
     return TransportRouteModel(
       id: json['id'] as int,
       name: json['name'] as String? ?? '',
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      price: _parsePrice(json['price']),
       duration: json['duration'] as String? ?? '',
       distance: json['distance'] as String? ?? '',
       state: json['state'] as String? ?? 'Active',
@@ -27,6 +29,15 @@ class TransportRouteModel extends TransportRoute {
       originAddress: json['originAddress'] as String?,
       destinationAddress: json['destinationAddress'] as String?,
     );
+  }
+
+  /// Helper para parsear el precio que viene del backend
+  static double _parsePrice(dynamic price) {
+    if (price == null) return 0.0;
+    if (price is double) return price;
+    if (price is int) return price.toDouble();
+    if (price is String) return double.tryParse(price) ?? 0.0;
+    return 0.0;
   }
 
   Map<String, dynamic> toJson() {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../profile/data/models/user_model.dart'; // Importa tu modelo de usuario
 import '../providers/auth_provider.dart';
+import '../../../profile/presentation/providers/user_provider.dart';
+import '../../../routes/presentation/providers/route_provider.dart';
 import '../../../routes/presentation/screens/routes_list_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,6 +19,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  static const Color brandBlue = Color.fromRGBO(107, 115, 233, 1);
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -27,13 +31,38 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = context.read<AuthProvider>();
-      
+      final userProvider = context.read<UserProvider>();
+      final routeProvider = context.read<RouteProvider>();
+
+      // 1. Llamada al Backend
       final success = await authProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
       if (success && mounted) {
+        
+        // 2. GUARDAR DATOS DEL USUARIO (Esto hace que aparezca en el perfil)
+        final newUser = UserModel(
+          id: authProvider.currentUser?.id.toString() ?? '1',
+          name: authProvider.currentUser?.name ?? 'Usuario',
+          lastName: '',
+          username: _emailController.text.split('@')[0], // Usamos parte del correo como username
+          email: _emailController.text.trim(),
+          phone: '',
+          gender: '',
+          favoriteRoutes: [],
+        );
+        
+        await userProvider.updateUser(newUser); // Guardar en SharedPreferences
+
+        // 3. Configurar token y cargar rutas
+        if (authProvider.token != null) {
+          routeProvider.setToken(authProvider.token!);
+          await routeProvider.loadRoutes();
+        }
+
+        // 4. Ir al Home
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const RoutesListScreen()),
         );
@@ -61,38 +90,21 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo o icono
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.directions_bus,
-                      size: 80,
-                      color: AppTheme.primary,
+                  SizedBox(
+                    height: 150,
+                    child: Image.asset(
+                      'assets/images/chapaturuta.png',
+                      fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(height: 32),
                   
-                  // Título
                   const Text(
                     'Gestión de Transporte',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textColor,
-                    ),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Inicia sesión para continuar',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                  ),
+                  Text('Inicia sesión para continuar', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
                   const SizedBox(height: 48),
                   
                   // Email
@@ -102,21 +114,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(
                       labelText: 'Email',
                       prefixIcon: const Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
-                      fillColor: AppTheme.secondary,
+                      fillColor: const Color(0xFFF5F7FA),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor ingresa tu email';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Por favor ingresa un email válido';
-                      }
-                      return null;
-                    },
+                    validator: (v) => (v == null || !v.contains('@')) ? 'Email inválido' : null,
                   ),
                   const SizedBox(height: 16),
                   
@@ -128,36 +130,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelText: 'Contraseña',
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
+                        icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
-                      fillColor: AppTheme.secondary,
+                      fillColor: const Color(0xFFF5F7FA),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor ingresa tu contraseña';
-                      }
-                      if (value.length < 6) {
-                        return 'La contraseña debe tener al menos 6 caracteres';
-                      }
-                      return null;
-                    },
+                    validator: (v) => (v == null || v.length < 6) ? 'Mínimo 6 caracteres' : null,
                   ),
                   const SizedBox(height: 24),
                   
-                  // Botón de login
+                  // Botón Login
                   Consumer<AuthProvider>(
                     builder: (context, authProvider, child) {
                       return SizedBox(
@@ -165,48 +149,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: ElevatedButton(
                           onPressed: authProvider.isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primary,
+                            backgroundColor: brandBlue, // COLOR AZUL
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: authProvider.isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Iniciar Sesión',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Text('Iniciar Sesión', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                         ),
                       );
                     },
                   ),
                   const SizedBox(height: 16),
                   
-                  // Link para registro (opcional)
                   TextButton(
-                    onPressed: () {
-                      // Navegar a registro si lo implementas
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Función de registro no implementada'),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      '¿No tienes cuenta? Regístrate',
-                      style: TextStyle(color: AppTheme.primary),
-                    ),
+                    onPressed: () {},
+                    child: const Text('¿No tienes cuenta? Regístrate', style: TextStyle(color: brandBlue)),
                   ),
                 ],
               ),

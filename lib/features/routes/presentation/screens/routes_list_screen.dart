@@ -17,32 +17,11 @@ class RoutesListScreen extends StatefulWidget {
 class _RoutesListScreenState extends State<RoutesListScreen> {
   final List<String> regions = ['', 'Lima', 'Callao', 'Arequipa'];
   final List<String> provinces = ['', 'Lima', 'Callao', 'Arequipa'];
-  final List<String> districts = [
-    '',
-    'San Isidro',
-    'Miraflores',
-    'Callao',
-    'Santiago de Surco',
-    'Los Olivos',
-    'Chorrillos',
-    'Ate',
-    'Pueblo Libre',
-    'San Juan de Lurigancho',
-    'San Borja'
-  ];
-  final List<String> localities = [
-    '',
-    'San Isidro Centro',
-    'Miraflores',
-    'Callao Centro',
-    'Surco',
-    'Los Olivos',
-    'Chorrillos',
-    'Ate Vitarte',
-    'Pueblo Libre',
-    'SJL',
-    'San Borja'
-  ];
+  final List<String> districts = ['', 'San Isidro', 'Miraflores', 'Callao', 'Santiago de Surco', 'Los Olivos', 'Chorrillos', 'Ate', 'Pueblo Libre', 'San Juan de Lurigancho', 'San Borja'];
+  final List<String> localities = ['', 'San Isidro Centro', 'Miraflores', 'Callao Centro', 'Surco', 'Los Olivos', 'Chorrillos', 'Ate Vitarte', 'Pueblo Libre', 'SJL', 'San Borja'];
+
+  // Color Turquesa Principal
+  static const Color brandTeal =  const Color.fromRGBO(107, 115, 233, 1);
 
   @override
   void initState() {
@@ -54,190 +33,124 @@ class _RoutesListScreenState extends State<RoutesListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-
-      // ===================== APP BAR ==========================
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            backgroundColor: AppTheme.primary,
-            child: const Icon(Icons.location_on, color: Colors.white),
-          ),
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'Inicio',
-                style: TextStyle(
-                  color: AppTheme.primary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FavoritesScreen(),
-                  ),
-                );
-              },
-              child: Text(
-                'Ver mis favoritos',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
-            },
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppTheme.primary, width: 2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.person, color: AppTheme.primary),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-
-      // ===================== BODY ==========================
-      body: Consumer<RouteProvider>(
-        builder: (context, provider, child) {
-          return CustomScrollView(
-            slivers: [
-              // ===================== FILTROS ==========================
-              SliverToBoxAdapter(child: _buildFilters(provider)),
-
-              // ===================== ESTADOS ==========================
-              if (provider.isLoading)
-                const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (provider.error != null)
-                SliverFillRemaining(
-                  child: Center(child: Text(provider.error!)),
-                )
-              else if (provider.routes.isEmpty)
-                const SliverFillRemaining(
-                  child: Center(child: Text('No se encontraron rutas')),
-                )
-              else
-                // ===================== GRID DE RUTAS ==========================
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.72, // OPTIMIZADO PARA MÓVIL
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final route = provider.routes[index];
-                        return RouteCard(
-                          route: route,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => RouteDetailScreen(routeId: route.id.toString()),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      childCount: provider.routes.length,
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Consumer<RouteProvider>(
+          builder: (context, provider, child) {
+            return CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const CircleAvatar(
+                          backgroundColor:  const Color.fromRGBO(107, 115, 233, 1),
+                          child: Icon(Icons.location_on, color: Colors.white),
+                        ),
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed: () {},
+                              child: const Text('Inicio', style: TextStyle(color: brandTeal, fontWeight: FontWeight.bold)),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FavoritesScreen())),
+                              child: Text('Ver mis favoritos', style: TextStyle(color: Colors.grey[600])),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: brandTeal, width: 2), 
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.person, color: brandTeal, size: 20),
+                          ),
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-            ],
-          );
-        },
+
+                SliverToBoxAdapter(child: _buildFilters(provider)),
+
+                if (provider.isLoading)
+                  const SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: brandTeal)))
+                else if (provider.error != null)
+                  SliverFillRemaining(child: Center(child: Text(provider.error!)))
+                else if (provider.routes.isEmpty)
+                  const SliverFillRemaining(child: Center(child: Text('No se encontraron rutas')))
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 0.62,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final route = provider.routes[index];
+                          return RouteCard(
+                            route: route,
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => RouteDetailScreen(routeId: route.id.toString())));
+                            },
+                          );
+                        },
+                        childCount: provider.routes.length,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  // ===================== FILTROS UI ==========================
   Widget _buildFilters(RouteProvider provider) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       color: Colors.white,
       child: Column(
         children: [
           Row(
             children: [
-              Expanded(
-                child: _buildDropdown(
-                  'Región',
-                  provider.selectedRegion,
-                  regions,
-                  (value) => provider.setRegion(value?.isEmpty == true ? null : value),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildDropdown(
-                  'Provincia',
-                  provider.selectedProvince,
-                  provinces,
-                  (value) => provider.setProvince(value?.isEmpty == true ? null : value),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDropdown(
-                  'Distrito',
-                  provider.selectedDistrict,
-                  districts,
-                  (value) => provider.setDistrict(value?.isEmpty == true ? null : value),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildDropdown(
-                  'Localidad/Ciudad',
-                  provider.selectedLocality,
-                  localities,
-                  (value) => provider.setLocality(value?.isEmpty == true ? null : value),
-                ),
-              ),
+              Expanded(child: _buildDropdown('Región', provider.selectedRegion, regions, (v) => provider.setRegion(v?.isEmpty == true ? null : v))),
+              const SizedBox(width: 12),
+              Expanded(child: _buildDropdown('Provincia', provider.selectedProvince, provinces, (v) => provider.setProvince(v?.isEmpty == true ? null : v))),
             ],
           ),
           const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _buildDropdown('Distrito', provider.selectedDistrict, districts, (v) => provider.setDistrict(v?.isEmpty == true ? null : v))),
+              const SizedBox(width: 12),
+              Expanded(child: _buildDropdown('Localidad/Ciudad', provider.selectedLocality, localities, (v) => provider.setLocality(v?.isEmpty == true ? null : v))),
+            ],
+          ),
+          const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
+            height: 50,
             child: ElevatedButton(
               onPressed: () => provider.filterRoutes(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.textColor,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                backgroundColor: const Color.fromRGBO(107, 115, 233, 1), 
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Buscar'),
+              child: const Text('Buscar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           ),
         ],
@@ -245,47 +158,25 @@ class _RoutesListScreenState extends State<RoutesListScreen> {
     );
   }
 
-  // ===================== DROPDOWN ==========================
-  Widget _buildDropdown(
-    String label,
-    String? value,
-    List<String> items,
-    Function(String?) onChanged,
-  ) {
+  Widget _buildDropdown(String label, String? value, List<String> items, Function(String?) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[700],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[700], fontWeight: FontWeight.w500)),
+        const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
+            color: Colors.white,
             border: Border.all(color: Colors.grey[300]!),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: value ?? '',
               isExpanded: true,
-              items: items.map((item) {
-                return DropdownMenuItem(
-                  value: item,
-                  child: Text(
-                    item.isEmpty ? 'Select' : item,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: item.isEmpty ? Colors.grey : AppTheme.textColor,
-                    ),
-                  ),
-                );
-              }).toList(),
+              icon: const Icon(Icons.keyboard_arrow_down),
+              items: items.map((item) => DropdownMenuItem(value: item, child: Text(item.isEmpty ? 'Select' : item, style: TextStyle(fontSize: 13, color: item.isEmpty ? Colors.grey : AppTheme.textColor), overflow: TextOverflow.ellipsis))).toList(),
               onChanged: onChanged,
             ),
           ),

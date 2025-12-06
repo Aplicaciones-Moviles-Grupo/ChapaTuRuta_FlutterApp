@@ -9,6 +9,10 @@ class RouteProvider with ChangeNotifier {
   
   List<TransportRoute> _routes = [];
   List<TransportRoute> _filteredRoutes = [];
+  
+  // 👇 AGREGADO: Lista para guardar los favoritos en memoria
+  final List<TransportRoute> _favoriteRoutes = [];
+
   bool _isLoading = false;
   String? _error;
   
@@ -23,6 +27,10 @@ class RouteProvider with ChangeNotifier {
   });
 
   List<TransportRoute> get routes => _filteredRoutes.isEmpty ? _routes : _filteredRoutes;
+  
+  // 👇 AGREGADO: Getter para leer los favoritos desde la pantalla de favoritos
+  List<TransportRoute> get favoriteRoutes => _favoriteRoutes;
+
   bool get isLoading => _isLoading;
   String? get error => _error;
   
@@ -33,6 +41,22 @@ class RouteProvider with ChangeNotifier {
 
   void setToken(String token) {
     apiService?.setBearerToken(token);
+  }
+
+  // 👇 AGREGADO: Método para saber si una ruta ya es favorita
+  bool isFavorite(int id) {
+    return _favoriteRoutes.any((route) => route.id == id);
+  }
+
+  // 👇 AGREGADO: Método para agregar o quitar de favoritos
+  void toggleFavorite(TransportRoute route) {
+    final exists = _favoriteRoutes.any((r) => r.id == route.id);
+    if (exists) {
+      _favoriteRoutes.removeWhere((r) => r.id == route.id);
+    } else {
+      _favoriteRoutes.add(route);
+    }
+    notifyListeners();
   }
 
   Future<void> loadRoutes() async {
