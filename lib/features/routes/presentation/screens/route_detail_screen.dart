@@ -3,15 +3,11 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/route.dart';
 import '../providers/route_provider.dart';
-import '../../../profile/presentation/providers/user_provider.dart';
 
 class RouteDetailScreen extends StatefulWidget {
   final String routeId;
 
-  const RouteDetailScreen({
-    super.key,
-    required this.routeId,
-  });
+  const RouteDetailScreen({super.key, required this.routeId});
 
   @override
   State<RouteDetailScreen> createState() => _RouteDetailScreenState();
@@ -20,6 +16,9 @@ class RouteDetailScreen extends StatefulWidget {
 class _RouteDetailScreenState extends State<RouteDetailScreen> {
   TransportRoute? route;
   bool isLoading = true;
+  static const Color accentPurple = Color(0xFFE6E6FA);
+  // Color Turquesa
+  static const Color brandTeal = const Color.fromRGBO(107, 115, 233, 1);
 
   @override
   void initState() {
@@ -37,209 +36,118 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    if (isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (route == null) return const Scaffold(body: Center(child: Text('Ruta no encontrada')));
 
-    if (route == null) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: const Center(child: Text('Ruta no encontrada')),
-      );
-    }
+    final isFavorite = context.select<RouteProvider, bool>(
+      (provider) => provider.isFavorite(route!.id)
+    );
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[400]!),
-              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[200]!),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.arrow_back, color: AppTheme.textColor),
+            child: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(route!.name),
+        title: Text(route!.name, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
+        
         actions: [
-          Consumer<UserProvider>(
-            builder: (context, userProvider, child) {
-              final isFavorite = userProvider.currentUser?.favoriteRoutes.contains(route!.id) ?? false;
-              return IconButton(
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? Colors.red : AppTheme.textColor,
+          // BOTÓN CORAZÓN
+          IconButton(
+            onPressed: () {
+              context.read<RouteProvider>().toggleFavorite(route!);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(isFavorite ? 'Eliminado de favoritos' : 'Guardado en favoritos'),
+                  duration: const Duration(seconds: 1),
                 ),
-                onPressed: () async {
-                  if (isFavorite) {
-                    await userProvider.removeFavoriteRoute(route!.id);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Eliminado de favoritos')),
-                      );
-                    }
-                  } else {
-                    await userProvider.addFavoriteRoute(route!.id);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Agregado a favoritos')),
-                      );
-                    }
-                  }
-                },
               );
             },
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? Colors.red : const Color.fromRGBO(107, 115, 233, 1), 
+              size: 28,
+            ),
           ),
           const SizedBox(width: 8),
         ],
       ),
+      
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Imágenes
-              Row(
-  children: [
-    Expanded(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.asset(
-          'assets/images/${route!.stopA.image}',
-          height: 200,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      ),
-    ),
-    const SizedBox(width: 12),
-    Expanded(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.asset(
-          'assets/images/${route!.stopB.image}',
-          height: 200,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      ),
-    ),
-  ],
-),
-
+              Container(
+                height: 220,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: accentPurple,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Center(child: Icon(Icons.map_outlined, size: 64, color: brandTeal.withOpacity(0.3))),
+              ),
               const SizedBox(height: 24),
-              
-              // Información principal
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.image_outlined, size: 24),
-                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      route!.company,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(route!.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, height: 1.2)),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: route!.state == 'Active' ? const Color(0xFFC8E6C9) : const Color(0xFFFFCDD2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            route!.state == 'Active' ? 'Active' : 'Inactive', 
+                            style: TextStyle(
+                              fontSize: 12, 
+                              fontWeight: FontWeight.bold, 
+                              color: route!.state == 'Active' ? const Color(0xFF2E7D32) : const Color(0xFFC62828)
+                            )
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    's/${route!.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Text('S/ ${route!.price.toStringAsFixed(2)}', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 102, 109, 212))),
                 ],
               ),
-              const SizedBox(height: 16),
-              
-              // Detalles
-              _buildInfoRow(Icons.access_time, route!.duration),
-              _buildInfoRow(Icons.schedule, route!.frequency),
-              _buildInfoRow(Icons.phone, route!.phone),
-              
               const SizedBox(height: 24),
-              
-              // Direcciones
-              const Text(
-                'Direcciones:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text('Paradero A: ${route!.stopA.address}'),
-              const SizedBox(height: 4),
-              Text('Paradero B: ${route!.stopB.address}'),
-              
-              const SizedBox(height: 24),
-              
-              // Contacto
-              const Text(
-                'Contacto:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text('Paradero A: ${route!.phone}'),
-              Text('Paradero B: ${route!.phone}'),
-              
-              const SizedBox(height: 24),
-              
-              // Horarios
+
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(12),
+                  color: accentPurple.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    const Text(
-                      'Horarios de atención',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ...route!.schedule.entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              entry.key,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            Text(
-                              entry.value,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
+                    _buildStatItem(Icons.access_time_filled, 'Duración', route!.duration),
+                    Container(height: 40, width: 1, color: Colors.grey[400]),
+                    _buildStatItem(Icons.straighten, 'Distancia', route!.distance),
                   ],
                 ),
               ),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -247,16 +155,19 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+  Widget _buildStatItem(IconData icon, String label, String value) {
+    return Expanded(
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: const TextStyle(fontSize: 14),
+          Icon(icon, color: brandTeal, size: 24),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ],
           ),
         ],
       ),

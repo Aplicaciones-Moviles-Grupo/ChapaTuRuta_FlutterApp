@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/user_provider.dart';
+import '../../data/models/user_model.dart';
 import '../widgets/profile_option_tile.dart';
 import 'edit_profile_screen.dart';
 import 'favorites_screen.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,9 +17,12 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  static const Color brandBlue = Color.fromRGBO(107, 115, 233, 1);
+
   @override
   void initState() {
     super.initState();
+    // Forzamos la carga del usuario al abrir la pantalla
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserProvider>().loadCurrentUser();
     });
@@ -27,116 +33,108 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('My Profile'),
+        title: const Text('My Profile', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Configuración
-            },
+            icon: const Icon(Icons.settings, color: Colors.black),
+            onPressed: () {},
           ),
         ],
       ),
       body: Consumer<UserProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: brandBlue));
           }
 
-          final user = provider.currentUser;
-          if (user == null) {
-            return const Center(child: Text('No se pudo cargar el usuario'));
-          }
+          // Si el usuario es null (error), mostramos uno temporal para que NO se rompa el diseño
+          final user = provider.currentUser ?? UserModel(
+            id: '0',
+            name: 'Usuario',
+            lastName: 'Invitado',
+            username: 'guest',
+            email: 'Cargando datos...',
+            phone: '',
+            gender: '',
+            favoriteRoutes: [],
+          );
 
           return SingleChildScrollView(
             child: Column(
               children: [
                 const SizedBox(height: 24),
                 
-                // Avatar
+                // AVATAR CON IMAGEN
                 Stack(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: AppTheme.off,
-                      child: Icon(
-                        Icons.person,
-                        size: 60,
-                        color: Colors.grey[600],
+                    Container(
+                      width: 100, 
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey.shade300, width: 2),
+                        image: const DecorationImage(
+                          image: AssetImage('assets/images/chapaturutalogo.png'),
+                          fit: BoxFit.cover, 
+                        ),
                       ),
                     ),
                     Positioned(
                       bottom: 0,
                       right: 0,
                       child: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(6),
                         decoration: const BoxDecoration(
-                          color: AppTheme.primary,
+                          color: brandBlue, // AZUL
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.edit,
-                          size: 16,
-                          color: Colors.white,
-                        ),
+                        child: const Icon(Icons.edit, size: 16, color: Colors.white),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 
-                // Nombre
+                // DATOS DEL USUARIO
                 Text(
                   user.fullName,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 const SizedBox(height: 4),
-                
-                // Email
                 Text(
                   user.email,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 24),
                 
-                // Botón Edit Profile
+                // BOTÓN EDIT PROFILE
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const EditProfileScreen(),
-                          ),
-                        );
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()));
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        backgroundColor: brandBlue, // AZUL
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
                       ),
-                      child: const Text('Edit Profile'),
+                      child: const Text('Edit Profile', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
                 
-                // Opciones
+                // OPCIONES
                 Container(
                   color: Colors.white,
                   child: Column(
@@ -144,113 +142,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ProfileOptionTile(
                         icon: Icons.favorite_border,
                         title: 'Favoritos',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const FavoritesScreen(),
-                            ),
-                          );
-                        },
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FavoritesScreen())),
                       ),
-                      Divider(height: 1, color: Colors.grey[300]),
+                      const Divider(height: 1),
+                      ProfileOptionTile(icon: Icons.history, title: 'History', onTap: () {}),
+                      const Divider(height: 1),
+                      ProfileOptionTile(icon: Icons.settings, title: 'Settings', onTap: () {}),
+                      const Divider(height: 1),
                       
-                      ProfileOptionTile(
-                        icon: Icons.download_outlined,
-                        title: 'Downloads',
-                        onTap: () {
-                          // Descargas
-                        },
-                      ),
-                      Divider(height: 1, color: Colors.grey[300]),
-                      
-                      ProfileOptionTile(
-                        icon: Icons.language,
-                        title: 'Languages',
-                        onTap: () {
-                          // Idiomas
-                        },
-                      ),
-                      Divider(height: 1, color: Colors.grey[300]),
-                      
-                      ProfileOptionTile(
-                        icon: Icons.location_on_outlined,
-                        title: 'Location',
-                        onTap: () {
-                          // Ubicación
-                        },
-                      ),
-                      Divider(height: 1, color: Colors.grey[300]),
-                      
-                      ProfileOptionTile(
-                        icon: Icons.subscriptions_outlined,
-                        title: 'Subscription',
-                        onTap: () {
-                          // Suscripción
-                        },
-                      ),
-                      Divider(height: 1, color: Colors.grey[300]),
-                      
-                      ProfileOptionTile(
-                        icon: Icons.display_settings_outlined,
-                        title: 'Display',
-                        onTap: () {
-                          // Display
-                        },
-                      ),
-                      Divider(height: 1, color: Colors.grey[300]),
-                      
-                      ProfileOptionTile(
-                        icon: Icons.cleaning_services_outlined,
-                        title: 'Clear Cache',
-                        onTap: () {
-                          // Limpiar caché
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Caché limpiado')),
-                          );
-                        },
-                      ),
-                      Divider(height: 1, color: Colors.grey[300]),
-                      
-                      ProfileOptionTile(
-                        icon: Icons.history,
-                        title: 'Clear History',
-                        onTap: () {
-                          // Limpiar historial
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Historial limpiado')),
-                          );
-                        },
-                      ),
-                      Divider(height: 1, color: Colors.grey[300]),
-                      
+                      // LOG OUT
                       ProfileOptionTile(
                         icon: Icons.logout,
                         title: 'Log Out',
                         onTap: () async {
-                          await provider.logout();
-                          if (context.mounted) {
-                            Navigator.of(context).popUntil((route) => route.isFirst);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Sesión cerrada')),
-                            );
+                          final shouldLogout = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Cerrar Sesión'),
+                              content: const Text('¿Estás seguro que deseas cerrar sesión?'),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+                                ElevatedButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  style: ElevatedButton.styleFrom(backgroundColor: brandBlue),
+                                  child: const Text('Cerrar Sesión'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (shouldLogout == true && context.mounted) {
+                            await context.read<UserProvider>().logout();
+                            await context.read<AuthProvider>().logout();
+                            if (context.mounted) {
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                (route) => false,
+                              );
+                            }
                           }
                         },
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                
-                // Versión
-                Text(
-                  'App Version 2.1',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[500],
-                  ),
-                ),
-                const SizedBox(height: 24),
               ],
             ),
           );
