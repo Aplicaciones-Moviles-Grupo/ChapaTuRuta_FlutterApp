@@ -7,10 +7,7 @@ import '../providers/route_provider.dart';
 class RouteDetailScreen extends StatefulWidget {
   final String routeId;
 
-  const RouteDetailScreen({
-    super.key,
-    required this.routeId,
-  });
+  const RouteDetailScreen({super.key, required this.routeId});
 
   @override
   State<RouteDetailScreen> createState() => _RouteDetailScreenState();
@@ -19,6 +16,9 @@ class RouteDetailScreen extends StatefulWidget {
 class _RouteDetailScreenState extends State<RouteDetailScreen> {
   TransportRoute? route;
   bool isLoading = true;
+  static const Color accentPurple = Color(0xFFE6E6FA);
+  // Color Turquesa
+  static const Color brandTeal = const Color.fromRGBO(107, 115, 233, 1);
 
   @override
   void initState() {
@@ -36,287 +36,118 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    if (isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (route == null) return const Scaffold(body: Center(child: Text('Ruta no encontrada')));
 
-    if (route == null) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: const Center(child: Text('Ruta no encontrada')),
-      );
-    }
+    final isFavorite = context.select<RouteProvider, bool>(
+      (provider) => provider.isFavorite(route!.id)
+    );
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[400]!),
-              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[200]!),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.arrow_back, color: AppTheme.textColor),
+            child: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(route!.name),
+        title: Text(route!.name, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
+        
         actions: [
-          TextButton(
+          // BOTÓN CORAZÓN
+          IconButton(
             onPressed: () {
+              context.read<RouteProvider>().toggleFavorite(route!);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Agregado a colección')),
+                SnackBar(
+                  content: Text(isFavorite ? 'Eliminado de favoritos' : 'Guardado en favoritos'),
+                  duration: const Duration(seconds: 1),
+                ),
               );
             },
-            child: const Text(
-              'Agregar a colección',
-              style: TextStyle(color: AppTheme.primary),
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? Colors.red : const Color.fromRGBO(107, 115, 233, 1), 
+              size: 28,
             ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
+      
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Imagen principal (puedes usar Google Maps Static API si tienes polyline)
               Container(
-                height: 200,
+                height: 220,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppTheme.off,
-                  borderRadius: BorderRadius.circular(12),
+                  color: accentPurple,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                child: route!.polylineRoute != null && route!.polylineRoute!.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          'https://maps.googleapis.com/maps/api/staticmap?size=600x400&path=enc:${route!.polylineRoute}&key=YOUR_GOOGLE_MAPS_KEY',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
-                              child: Icon(
-                                Icons.map,
-                                size: 60,
-                                color: Colors.grey[600],
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    : Center(
-                        child: Icon(
-                          Icons.map,
-                          size: 60,
-                          color: Colors.grey[600],
-                        ),
-                      ),
+                child: Center(child: Icon(Icons.map_outlined, size: 64, color: brandTeal.withOpacity(0.3))),
               ),
               const SizedBox(height: 24),
-              
-              // Información principal
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: route!.state == 'Active' 
-                          ? Colors.green.withOpacity(0.2)
-                          : Colors.grey.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.directions_bus,
-                      color: route!.state == 'Active' ? Colors.green[700] : Colors.grey[700],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          route!.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
+                        Text(route!.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, height: 1.2)),
+                        const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: route!.state == 'Active' 
-                                ? Colors.green.withOpacity(0.2)
-                                : Colors.grey.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(4),
+                            color: route!.state == 'Active' ? const Color(0xFFC8E6C9) : const Color(0xFFFFCDD2),
+                            borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            route!.state,
+                            route!.state == 'Active' ? 'Active' : 'Inactive', 
                             style: TextStyle(
-                              fontSize: 12,
-                              color: route!.state == 'Active' 
-                                  ? Colors.green[700] 
-                                  : Colors.grey[700],
-                              fontWeight: FontWeight.w600,
-                            ),
+                              fontSize: 12, 
+                              fontWeight: FontWeight.bold, 
+                              color: route!.state == 'Active' ? const Color(0xFF2E7D32) : const Color(0xFFC62828)
+                            )
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Text(
-                    's/${route!.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primary,
-                    ),
-                  ),
+                  Text('S/ ${route!.price.toStringAsFixed(2)}', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 102, 109, 212))),
                 ],
               ),
               const SizedBox(height: 24),
-              
-              // Detalles de la ruta
+
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
                 decoration: BoxDecoration(
-                  color: AppTheme.off.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    _buildDetailRow(
-                      Icons.access_time,
-                      'Duración',
-                      route!.duration,
-                    ),
-                    const Divider(height: 24),
-                    _buildDetailRow(
-                      Icons.straighten,
-                      'Distancia',
-                      route!.distance,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              
-              // Direcciones
-              const Text(
-                'Ruta:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              
-              _buildAddressCard(
-                'Origen',
-                route!.origin,
-                route!.originAddress ?? 'Dirección no disponible',
-                Icons.location_on,
-                Colors.green,
-              ),
-              const SizedBox(height: 12),
-              
-              _buildAddressCard(
-                'Destino',
-                route!.destination,
-                route!.destinationAddress ?? 'Dirección no disponible',
-                Icons.location_on,
-                Colors.red,
-              ),
-              const SizedBox(height: 24),
-              
-              // Información del conductor
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(12),
+                  color: accentPurple.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: AppTheme.primary.withOpacity(0.2),
-                      child: const Icon(
-                        Icons.person,
-                        size: 30,
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Conductor',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Text(
-                            'ID: ${route!.driverId}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        // Contactar conductor
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Función de contacto')),
-                        );
-                      },
-                      icon: const Icon(Icons.message, color: AppTheme.primary),
-                    ),
+                    _buildStatItem(Icons.access_time_filled, 'Duración', route!.duration),
+                    Container(height: 40, width: 1, color: Colors.grey[400]),
+                    _buildStatItem(Icons.straighten, 'Distancia', route!.distance),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              
-              // Botón de acción
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Reservar ruta: ${route!.name}'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Reservar Ruta',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -324,84 +155,19 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Icon(icon, size: 24, color: AppTheme.primary),
-        const SizedBox(width: 12),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.grey,
-          ),
-        ),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAddressCard(
-    String label,
-    String title,
-    String address,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(12),
-      ),
+  Widget _buildStatItem(IconData icon, String label, String value) {
+    return Expanded(
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
+          Icon(icon, color: brandTeal, size: 24),
           const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (address != 'Dirección no disponible')
-                  Text(
-                    address,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-              ],
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ],
           ),
         ],
       ),

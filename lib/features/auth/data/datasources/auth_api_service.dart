@@ -3,12 +3,12 @@ import 'package:http/http.dart' as http;
 import '../models/auth_model.dart';
 
 class AuthApiService {
-  static const String baseUrl = 'http://10.0.2.2:5042/api/v1';
+  static const String baseUrl = 'https://chapaturutabackend.onrender.com/api/v1';
 
   Future<AuthUserModel> login(String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/sign-in'), // CAMBIADO
+        Uri.parse('$baseUrl/auth/sign-in'), 
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
